@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Intégration de flux RSS</title>
+</head>
+<body>
+    <div id="rss-feed"></div>
+    
+    <script>
+        // URL du flux RSS
+        const rssFeedUrl = 'http://fr.audiofanzine.com/news/partenaires/rss.xml';
+
+        // Fonction pour charger et afficher le flux RSS
+        function loadRSSFeed() {
+            const rssContainer = document.getElementById('rss-feed');
+
+            // Créer un élément <script> pour charger le flux JSONP
+            const script = document.createElement('script');
+            script.src = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssFeedUrl)}&callback=displayRSS`;
+
+            // Insérer le script dans le DOM
+            document.body.appendChild(script);
+        }
+
+        // Fonction de rappel pour afficher le flux RSS
+        function displayRSS(data) {
+            const rssContainer = document.getElementById('rss-feed');
+
+            if (data.status === 'ok') {
+                const items = data.items;
+                const ul = document.createElement('ul');
+
+                items.forEach(function(item) {
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = item.link;
+                    link.textContent = item.title;
+                    li.appendChild(link);
+                    ul.appendChild(li);
+                });
+
+                rssContainer.appendChild(ul);
+            } else {
+                rssContainer.textContent = 'Impossible de charger le flux RSS.';
+            }
+        }
+
+        // Charger le flux RSS lors du chargement de la page
+        window.onload = loadRSSFeed;
+    </script>
+</body>
+</html>
