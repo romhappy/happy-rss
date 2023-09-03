@@ -2,41 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intégration de flux RSS</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-    <div id="rss-feed"></div>
-    
+    <header>
+    <img src="img/logo_site.svg" class="logo_site">
+    <div class="meteo">
+        <iframe id="widget_autocomplete_preview"  width="150" height="300" frameborder="0" src="https://meteofrance.com/widget/prevision/751130##5271FF"> </iframe>
+    </div>
+</header>
+    <div id="rss-feed-1">
+    </div>
+    <div id="rss-feed-2">
+    </div>
+    <div id="rss-feed-3">
+    </div>
     <script>
-        // URL du flux RSS
-        const rssFeedUrl = 'http://fr.audiofanzine.com/news/partenaires/rss.xml';
+        // Tableau contenant les URL des flux RSS
+        const rssFeedUrls = [
+            'https://www.liberation.fr/arc/outboundfeeds/rss-all/?outputType=xml',
+            'http://fr.audiofanzine.com/news/partenaires/rss.xml','https://www.reddit.com/r/synthesizers/.rss'
+            // Ajoutez autant d'URL de flux RSS que nécessaire
+        ];
 
-        // Fonction pour charger et afficher le flux RSS
-        function loadRSSFeed() {
-            const rssContainer = document.getElementById('rss-feed');
+        // Nombre d'articles à afficher par flux RSS
+        const numberOfArticles = 10; // Changez cette valeur selon vos besoins
+
+        // Variable globale pour stocker feedIndex
+        let feedIndex;
+
+        // Fonction pour charger et afficher un flux RSS
+        function loadRSSFeed(index) {
+            feedIndex = index; // Stocker feedIndex dans la variable globale
+            const rssContainer = document.getElementById(`rss-feed-${feedIndex}`);
 
             // Créer un élément <script> pour charger le flux JSONP
             const script = document.createElement('script');
-            script.src = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssFeedUrl)}&callback=displayRSS`;
+            script.src = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssFeedUrls[index])}&callback=displayRSS`;
 
             // Insérer le script dans le DOM
             document.body.appendChild(script);
         }
 
-        // Fonction de rappel pour afficher le flux RSS
+        // Fonction de rappel pour afficher un flux RSS
         function displayRSS(data) {
-            const rssContainer = document.getElementById('rss-feed');
+            const rssContainer = document.getElementById(`rss-feed-${feedIndex}`);
 
             if (data.status === 'ok') {
-                const items = data.items;
+                const items = data.items.slice(0, numberOfArticles); // Limiter le nombre d'articles
+
                 const ul = document.createElement('ul');
 
                 items.forEach(function(item) {
                     const li = document.createElement('li');
+                    const card = document.createElement('div'); // Ajoutez une div pour la carte
+                    card.classList.add('rss-card'); // Ajoutez la classe de la carte
+
+                    const title = document.createElement('h2');
+                    title.textContent = item.title;
+
+                    const description = document.createElement('p');
+                    description.textContent = item.description;
+
                     const link = document.createElement('a');
                     link.href = item.link;
-                    link.textContent = item.title;
-                    li.appendChild(link);
+                    link.textContent = 'Lire la suite';
+
+                    card.appendChild(title);
+                    card.appendChild(description);
+                    card.appendChild(link);
+                    
+                    li.appendChild(card);
                     ul.appendChild(li);
                 });
 
@@ -46,8 +84,12 @@
             }
         }
 
-        // Charger le flux RSS lors du chargement de la page
-        window.onload = loadRSSFeed;
+        // Charger les flux RSS lors du chargement de la page
+        window.onload = function() {
+            for (let i = 0; i < rssFeedUrls.length; i++) {
+                loadRSSFeed(i);
+            }
+        };
     </script>
 </body>
 </html>
