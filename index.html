@@ -8,27 +8,23 @@
 </head>
 <body>
     <header>
-    <img src="img/logo_site.svg" class="logo_site">
-    <div class="meteo">
-        <iframe id="widget_autocomplete_preview"  width="150" height="300" frameborder="0" src="https://meteofrance.com/widget/prevision/751130##5271FF"> </iframe>
-    </div>
-</header>
-    <div id="rss-feed-1">
-    </div>
-    <div id="rss-feed-2">
-    </div>
-    <div id="rss-feed-3">
-    </div>
+        <img src="img/logo_site.svg" class="logo_site">
+        <div class="meteo">
+            <iframe id="widget_autocomplete_preview" width="150" height="300" frameborder="0" src="https://meteofrance.com/widget/prevision/751130##5271FF"></iframe>
+        </div>
+        <button id="refreshButton">Actualiser</button>
+    </header>
+    <div id="rss-feed-1"></div>
+    <div id="rss-feed-2"></div>
+    <div id="rss-feed-3"></div>
+
     <script>
         // Tableau contenant les URL des flux RSS
         const rssFeedUrls = [
             'https://www.liberation.fr/arc/outboundfeeds/rss-all/collection/accueil-une/?outputType=xml',
+            'https://www.journaldugeek.com/tag/rss/',
+            'https://www.unapei.org/flux-rss/',
             'https://www.journaldugeek.com/tag/rss/'
-            ,'https://www.unapei.org/flux-rss/'
-            , 'https://www.journaldugeek.com/tag/rss/'
-            
-            
-            // Ajoutez autant d'URL de flux RSS que nécessaire
         ];
 
         // Nombre d'articles à afficher par flux RSS
@@ -59,7 +55,7 @@
 
                 const ul = document.createElement('ul');
 
-                items.forEach(function(item) {
+                items.forEach(function(item, index) {
                     const li = document.createElement('li');
                     const card = document.createElement('div'); // Ajoutez une div pour la carte
                     card.classList.add('rss-card'); // Ajoutez la classe de la carte
@@ -74,10 +70,15 @@
                     link.href = item.link;
                     link.textContent = 'Lire la suite';
 
+                    // Ajoutez un gestionnaire d'événements au clic pour supprimer l'article
+                    card.addEventListener('click', function() {
+                        ul.removeChild(li); // Supprimez l'article du DOM
+                    });
+
                     card.appendChild(title);
                     card.appendChild(description);
                     card.appendChild(link);
-                    
+
                     li.appendChild(card);
                     ul.appendChild(li);
                 });
@@ -89,11 +90,26 @@
         }
 
         // Charger les flux RSS lors du chargement de la page
-        window.onload = function() {
+        window.onload = function () {
             for (let i = 0; i < rssFeedUrls.length; i++) {
                 loadRSSFeed(i);
             }
         };
+
+        // Gestionnaire d'événements pour le bouton "Actualiser"
+        const refreshButton = document.getElementById('refreshButton');
+        refreshButton.addEventListener('click', function () {
+            // Effacez le contenu actuel des conteneurs RSS
+            for (let i = 0; i < rssFeedUrls.length; i++) {
+                const rssContainer = document.getElementById(`rss-feed-${i}`);
+                rssContainer.innerHTML = '';
+            }
+
+            // Chargez à nouveau les flux RSS
+            for (let i = 0; i < rssFeedUrls.length; i++) {
+                loadRSSFeed(i);
+            }
+        });
     </script>
 </body>
 </html>
